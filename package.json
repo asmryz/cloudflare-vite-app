@@ -15,6 +15,7 @@
     "publish": true
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
     "hono": "4.8.2",
     "react": "19.0.0",
     "react-dom": "19.0.0"
@@ -42,7 +43,7 @@
     "deploy": "wrangler deploy",
     "dev": "vite",
     "lint": "eslint .",
-    "preview": "npm run build && vite preview"
+    "preview": "npm run build && vite preview --host"
   },
   "type": "module"
 }
