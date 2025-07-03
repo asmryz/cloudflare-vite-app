@@ -3,38 +3,41 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-type Recap = { rid: number, course: string };
-type GradeAverage = {grade: string, total: number, per: number};
+type Recap = { rid: number; course: string };
+type GradeAverage = { grade: string; total: number; per: number };
 
 // The App component fetches data from the server and displays it in a structured way
 // It allows users to select a year, semester, batch, and course recap
 // The selected parameters are displayed in JSON format for debugging purposes
 function App() {
+	const [index, setIndex] = useState(0);
 	const [years, setYears] = useState<{ year: string }[]>([]);
 	const [semesters, setSemesters] = useState<{ semester: string }[]>([]);
 	const [batches, setBatches] = useState<{ class: string }[]>([]);
 	const [recaps, setRecaps] = useState<Recap[]>([]);
-    const [grades, setGrades] = useState<GradeAverage[]>([])
+	const [grades, setGrades] = useState<GradeAverage[]>([]);
 	const [params, setParams] = useState<{ year: string; semester: string; batch: string; course: Recap | null }>({ year: "", semester: "", batch: "", course: null });
 
-    //console.log(Object.entries(params).reduce((p, [k, v], i) => ({ ...p, [k]: i <= 3 ? v : '' }), {}));
+	//console.log(Object.entries(params).reduce((p, [k, v], i) => ({ ...p, [k]: i <= 3 ? v : '' }), {}));
 
-	useEffect(() => {
-		// setParams((prev) => 
-		// 	Object.entries(params).reduce((p, [k, v], i) => ({ ...p, [k]: prev[k] !== params[k] ? v : '' }), {}) as typeof prev
-		// );
-        setParams((prev) => {
-            Object.entries(params).forEach(([k, v], i, p) => console.log(...p, k, v, i));
-            return prev;
-        });
-	}, [params]);
+    const handleClick = (n: number) => {
+			setParams(
+				Object.entries(params).reduce(
+					(p, [k, v], i) => ({
+						...p,
+						[k]: i <= n ? v : (k === "course" ? null : "")
+					}),
+					{ year: "", semester: "", batch: "", course: null }
+				)
+			);
+            setIndex(n+1);
+            //console.log(params)
+    }
 
 	useEffect(() => {
 		fetch("/years/")
 			.then((res) => res.json() as Promise<{ year: string }[]>)
 			.then((data) => setYears(data));
-            console.log(Object.entries(params).reduce((p, [k, v], i) => ({ ...p, [k]: i === 0 ? v : '' }), {}));
-			
 	}, []);
 	useEffect(() => {
 		if (params.year.length > 0) {
@@ -42,6 +45,7 @@ function App() {
 				.then((res) => res.json() as Promise<{ semester: string }[]>)
 				.then((data) => setSemesters(data));
 		}
+        handleClick(0);
 	}, [params.year]);
 
 	useEffect(() => {
@@ -50,6 +54,7 @@ function App() {
 				.then((res) => res.json() as Promise<{ class: string }[]>)
 				.then((data) => setBatches(data));
 		}
+        handleClick(1);
 	}, [params.semester]);
 	useEffect(() => {
 		if (params.batch.length > 0) {
@@ -57,6 +62,7 @@ function App() {
 				.then((res) => res.json() as Promise<Recap[]>)
 				.then((data) => setRecaps(data));
 		}
+        handleClick(2);
 	}, [params.batch]);
 	useEffect(() => {
 		if (params.course !== null) {
@@ -64,10 +70,11 @@ function App() {
 				.then((res) => res.json() as Promise<GradeAverage[]>)
 				.then((data) => setGrades(data));
 		}
+        handleClick(3);
 	}, [params.course]);
 
-    //Object.entries(params).forEach(([k, v], i) => console.log(k[i]));
-    //console.log(`params:`, params); 
+	//Object.entries(params).forEach(([k, v], i) => console.log(k[i]));
+	//console.log(`params:`, params);
 
 	return (
 		<>
@@ -83,7 +90,7 @@ function App() {
 					</div>
 				))}
 			</div>
-			{semesters.length > 0 && (
+			{params.year.length !== 0 && (
 				<>
 					<h4>Semesters</h4>
 					<div style={{ display: "flex", flexWrap: "wrap" }}>
@@ -99,7 +106,7 @@ function App() {
 					</div>
 				</>
 			)}
-			{batches.length > 0 && (
+			{params.semester.length !== 0 && (
 				<>
 					<h4>Batches</h4>
 					<div style={{ display: "flex", flexWrap: "wrap" }}>
@@ -115,12 +122,12 @@ function App() {
 					</div>
 				</>
 			)}
-			{recaps.length > 0 && (
+			{params.batch.length !== 0 && (
 				<>
 					<h4>Recaps</h4>
 					<div style={{ display: "flex", flexWrap: "wrap" }}>
 						{recaps.map((recap) => (
-							<div
+							<div key={recap.rid}
 								style={{ cursor: "pointer", backgroundColor: params.course && params.course.rid === recap.rid ? "#42fd84" : "", padding: "0 10px" }}
 								onClick={() => setParams({ ...params, course: recap })}
 							>
@@ -130,30 +137,30 @@ function App() {
 					</div>
 				</>
 			)}
-			{grades.length > 0 && (
+			{params.course !== null && (
 				<>
 					<h4>Grade Average</h4>
 					<table>
-                        <thead>
-                            <tr>
-                                <th>Grade</th>
-                                <th>Total</th>
-                                <th>Percentage(%)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-						{grades.map((grade, index) => (
-                            <tr key={index}>
-                                <td>{grade.grade}</td>  
-                                <td>{grade.total}</td>  
-                                <td>{grade.per}</td>
-                            </tr>      
-						))}
-                        </tbody>
+						<thead>
+							<tr>
+								<th>Grade</th>
+								<th>Total</th>
+								<th>Percentage(%)</th>
+							</tr>
+						</thead>
+						<tbody>
+							{grades.map((grade, index) => (
+								<tr key={index}>
+									<td>{grade.grade}</td>
+									<td>{grade.total}</td>
+									<td>{grade.per}</td>
+								</tr>
+							))}
+						</tbody>
 					</table>
 				</>
 			)}
-            <pre style={{textAlign: 'left'}}>{JSON.stringify(params, null, 4)}</pre>
+			<pre style={{ textAlign: "left", color: '#d3d3d3' }}>{JSON.stringify({ index, params }, null, 4)}</pre>
 		</>
 	);
 }
