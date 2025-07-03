@@ -17,10 +17,24 @@ function App() {
     const [grades, setGrades] = useState<GradeAverage[]>([])
 	const [params, setParams] = useState<{ year: string; semester: string; batch: string; course: Recap | null }>({ year: "", semester: "", batch: "", course: null });
 
+    //console.log(Object.entries(params).reduce((p, [k, v], i) => ({ ...p, [k]: i <= 3 ? v : '' }), {}));
+
+	useEffect(() => {
+		// setParams((prev) => 
+		// 	Object.entries(params).reduce((p, [k, v], i) => ({ ...p, [k]: prev[k] !== params[k] ? v : '' }), {}) as typeof prev
+		// );
+        setParams((prev) => {
+            Object.entries(params).forEach(([k, v], i, p) => console.log(...p, k, v, i));
+            return prev;
+        });
+	}, [params]);
+
 	useEffect(() => {
 		fetch("/years/")
 			.then((res) => res.json() as Promise<{ year: string }[]>)
 			.then((data) => setYears(data));
+            console.log(Object.entries(params).reduce((p, [k, v], i) => ({ ...p, [k]: i === 0 ? v : '' }), {}));
+			
 	}, []);
 	useEffect(() => {
 		if (params.year.length > 0) {
@@ -51,6 +65,9 @@ function App() {
 				.then((data) => setGrades(data));
 		}
 	}, [params.course]);
+
+    //Object.entries(params).forEach(([k, v], i) => console.log(k[i]));
+    //console.log(`params:`, params); 
 
 	return (
 		<>
