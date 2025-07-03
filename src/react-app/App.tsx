@@ -55,7 +55,7 @@ function App() {
 	return (
 		<>
 			<h4>Years</h4>
-			<div style={{ display: "flex" }}>
+			<div style={{ display: "flex", flexWrap: "wrap" }}>
 				{years.map((year) => (
 					<div
 						key={year.year}
@@ -69,7 +69,7 @@ function App() {
 			{semesters.length > 0 && (
 				<>
 					<h4>Semesters</h4>
-					<div style={{ display: "flex" }}>
+					<div style={{ display: "flex", flexWrap: "wrap" }}>
 						{semesters.map((semester) => (
 							<div
 								key={semester.semester}
